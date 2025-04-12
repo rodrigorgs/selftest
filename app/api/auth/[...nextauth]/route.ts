@@ -12,6 +12,7 @@ const authOptions = {
   callbacks: {
     async signIn({ user }: { user: { email?: string | null; name?: string | null; image?: string | null } }) {
       if (user.email?.endsWith("@ufba.br")) {
+        console.log('User:', user.email, user.name, user.image);
         await prisma.user.upsert({
           where: { email: user.email },
           update: {},

@@ -9,17 +9,59 @@ generator client {
   output   = "../app/generated/prisma"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            Int    @id @default(autoincrement())
   name          String?
   email         String    @unique
   emailVerified DateTime?
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  groups Group[] @relation("GroupUsers")
+  ownedGroups Group[]
+
+  questionRequestTemplates QuestionRequestTemplate[]
+}
+
+model Group {
+  id        Int    @id @default(autoincrement())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerId   Int
+  owner     User   @relation(fields: [ownerId], references: [id])
+  users User[] @relation("GroupUsers")
+}
+
+model Topic {
+  id        Int    @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuestionRequestTemplate {
+  id             Int    @id @default(autoincrement())
+  name           String
+  promptTemplate String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  /// [QuestionRequestTemplateParameter]
+  parameters     Json[]
+  ownerId        Int
+
+  owner          User? @relation(fields: [ownerId], references: [id])
 }
