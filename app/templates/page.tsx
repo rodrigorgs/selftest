@@ -2,13 +2,13 @@
 
 // import { QuestionRequestTemplate  } from "../generated/prisma";
 // Removed the incorrect import as Prisma types are not directly exported from '@prisma/client'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PrismaJson } from "@/prisma/types";
 import { QuestionRequestTemplate } from "../generated/prisma/client";
 
 export default function QuestionRequestTemplates() {
   const [templates, setTemplates] = useState<QuestionRequestTemplate[]>([]);
-  const [newTemplate, setNewTemplate] = useState({
+  const [newTemplate, setNewTemplate] = useState<any>({
     name: "",
     promptTemplate: "",
     parameters: [] as PrismaJson.QuestionRequestTemplateParameter[], // Ensure PrismaJson is correctly defined elsewhere
@@ -24,6 +24,10 @@ export default function QuestionRequestTemplates() {
     const data = await response.json();
     setTemplates(data);
   }
+
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
 
   async function createTemplate() {
     if (!newTemplate.name || !newTemplate.promptTemplate) return;
