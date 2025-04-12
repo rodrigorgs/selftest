@@ -1,17 +1,21 @@
 'use client';
 
-// import { QuestionRequestTemplate  } from "../generated/prisma";
-// Removed the incorrect import as Prisma types are not directly exported from '@prisma/client'
 import { useState, useEffect } from "react";
 import { PrismaJson } from "@/prisma/types";
 import { QuestionRequestTemplate } from "../generated/prisma/client";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Label } from "@radix-ui/react-label";
 
 export default function QuestionRequestTemplates() {
   const [templates, setTemplates] = useState<QuestionRequestTemplate[]>([]);
   const [newTemplate, setNewTemplate] = useState<any>({
     name: "",
     promptTemplate: "",
-    parameters: [] as PrismaJson.QuestionRequestTemplateParameter[], // Ensure PrismaJson is correctly defined elsewhere
+    parameters: [] as PrismaJson.QuestionRequestTemplateParameter[],
   });
   const [newParameter, setNewParameter] = useState({
     name: "",
@@ -54,67 +58,73 @@ export default function QuestionRequestTemplates() {
   }
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1>Question Request Templates</h1>
-      <div>
-        <input
-          type="text"
-          value={newTemplate.name}
-          onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
-          placeholder="Template Name"
-          style={{ marginRight: "0.5rem" }}
-        />
-        <textarea
-          value={newTemplate.promptTemplate}
-          onChange={(e) => setNewTemplate({ ...newTemplate, promptTemplate: e.target.value })}
-          placeholder="Prompt Template"
-          style={{ marginRight: "0.5rem", display: "block", marginTop: "0.5rem" }}
-        />
-        <div style={{ marginTop: "1rem" }}>
-          <h3>Add Parameter</h3>
-          <input
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Question Request Templates</h1>
+      <Card className="mb-4">
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Create New Template</h2>
+        </CardHeader>
+        <CardContent>
+          <Input
             type="text"
-            value={newParameter.name}
-            onChange={(e) => setNewParameter({ ...newParameter, name: e.target.value })}
-            placeholder="Parameter Name"
-            style={{ marginRight: "0.5rem" }}
+            value={newTemplate.name}
+            onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
+            placeholder="Template Name"
+            className="mb-2"
           />
-          <input
-            type="text"
-            value={newParameter.values}
-            onChange={(e) => setNewParameter({ ...newParameter, values: e.target.value })}
-            placeholder="Comma-separated Values"
-            style={{ marginRight: "0.5rem" }}
+          <Textarea
+            value={newTemplate.promptTemplate}
+            onChange={(e) => setNewTemplate({ ...newTemplate, promptTemplate: e.target.value })}
+            placeholder="Prompt Template"
+            className="mb-4"
           />
-          <label>
-            <input
-              type="checkbox"
-              checked={newParameter.multipleSelect}
-              onChange={(e) =>
-                setNewParameter({ ...newParameter, multipleSelect: e.target.checked })
-              }
-            />
-            Multiple Select
-          </label>
-          <button onClick={addParameter} style={{ marginLeft: "0.5rem" }}>
-            Add Parameter
-          </button>
-        </div>
-        <button onClick={createTemplate} style={{ marginTop: "1rem" }}>Create Template</button>
-      </div>
-      <h2>Templates</h2>
-      <ul style={{ marginTop: "1rem" }}>
+          <Card>
+            <CardContent>
+              <h3 className="text-lg font-medium mb-2">Add Parameter</h3>
+              <Input
+                type="text"
+                value={newParameter.name}
+                onChange={(e) => setNewParameter({ ...newParameter, name: e.target.value })}
+                placeholder="Parameter Name"
+                className="mb-2"
+              />
+              <Input
+                type="text"
+                value={newParameter.values}
+                onChange={(e) => setNewParameter({ ...newParameter, values: e.target.value })}
+                placeholder="Comma-separated Values"
+                className="mb-2"
+              />
+              <Checkbox id="check"
+                checked={newParameter.multipleSelect}
+                onCheckedChange={(checked) => setNewParameter({ ...newParameter, multipleSelect: !!checked })}
+                className="mb-2"
+              />
+              <Label htmlFor="check"> Multiple selection</Label><br/>
+              <Button onClick={addParameter} className="mt-2">Add Parameter</Button>
+            </CardContent>
+          </Card>
+          <Button onClick={createTemplate} className="mt-4">Create Template</Button>
+        </CardContent>
+      </Card>
+      <h2 className="text-xl font-semibold mb-4">Templates</h2>
+      <ul className="space-y-4">
         {templates.map((template) => (
-          <li key={template.id}>
-            <strong>{template.name}</strong>: {template.promptTemplate}
-            <ul>
-              {template.parameters.map((param, index) => (
-                <li key={index}>
-                  <strong>{param.name}</strong> ({param.multipleSelect ? "Multiple" : "Single"}): {param.values.join(", ")}
-                </li>
-              ))}
-            </ul>
-          </li>
+          <Card key={template.id}>
+            <CardHeader>
+              <h3 className="text-lg font-medium">{template.name}</h3>
+            </CardHeader>
+            <CardContent>
+              <p>{template.promptTemplate}</p>
+              <ul className="mt-2 space-y-2">
+                {template.parameters.map((param, index) => (
+                  <li key={index}>
+                    <strong>{param.name}</strong> ({param.multipleSelect ? "Multiple" : "Single"}): {param.values.join(", ")}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
         ))}
       </ul>
     </div>
