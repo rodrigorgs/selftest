@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import prisma from '@/lib/prisma';
 
 const authOptions = {
   providers: [
@@ -9,8 +10,17 @@ const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user }: { user: { email?: string | null } }) {
+    async signIn({ user }: { user: { email?: string | null; name?: string | null; image?: string | null } }) {
       if (user.email?.endsWith("@ufba.br")) {
+        await prisma.user.upsert({
+          where: { email: user.email },
+          update: {},
+          create: {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          },
+        });
         return true;
       }
       return false;
