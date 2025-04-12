@@ -57,6 +57,20 @@ export default function QuestionRequestTemplates() {
     setNewParameter({ name: "", values: "", multipleSelect: false });
   }
 
+  function removeParameter(index: number) {
+    setNewTemplate({
+      ...newTemplate,
+      parameters: newTemplate.parameters.filter((_: any, i: number) => i !== index),
+    });
+  }
+
+  async function removeTemplate(id: number) {
+    await fetch(`/api/templates/${id}`, {
+      method: "DELETE",
+    });
+    fetchTemplates();
+  }
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Question Request Templates</h1>
@@ -78,6 +92,17 @@ export default function QuestionRequestTemplates() {
             placeholder="Prompt Template"
             className="mb-4"
           />
+          <h3 className="text-lg font-medium">Parameters</h3>
+          <ul className="mt-4">
+            {newTemplate.parameters.map((param: any, index: any) => (
+              <li key={index}>
+                <strong>{param.name}</strong> ({param.multipleSelect ? "Multiple" : "Single"}): {param.values.join(", ")}
+                <Button variant="destructive" onClick={() => removeParameter(index)} className="ml-2">
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
           <Card>
             <CardContent>
               <h3 className="text-lg font-medium mb-2">Add Parameter</h3>
@@ -123,6 +148,7 @@ export default function QuestionRequestTemplates() {
                   </li>
                 ))}
               </ul>
+              <Button onClick={() => removeTemplate(template.id)} className="ml-4">Remove</Button>
             </CardContent>
           </Card>
         ))}
