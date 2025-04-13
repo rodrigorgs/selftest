@@ -79,4 +79,16 @@ model QuestionRequest {
 
   user           User @relation(fields: [userId], references: [id])
   template       QuestionRequestTemplate? @relation(fields: [templateId], references: [id])
+  questions      Question[]
+}
+
+model Question {
+  id                 Int    @id @default(autoincrement())
+  content            String
+  correctAnswerIndex Int
+  /// [MultipleChoiceQuestionAlternative]
+  alternatives       Json[]
+
+  requestId Int
+  request   QuestionRequest @relation(fields: [requestId], references: [id])
 }

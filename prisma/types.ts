@@ -9,4 +9,19 @@ export namespace PrismaJson {
     name: string;
     values: string[];
   };
+
+  export type MultipleChoiceQuestionResponse = {
+    questions: MultipleChoiceQuestion[];
+  }
+
+  export type MultipleChoiceQuestion = {
+    content: string;
+    correctAnswerIndex: number;
+    alternatives: MultipleChoiceQuestionAlternative[];
+  }
+
+  export type MultipleChoiceQuestionAlternative = {
+    content: string;
+    feedback: string;
+  };
 }

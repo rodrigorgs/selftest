@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import OpenAI from "openai";
 import { QuestionRequest } from "@/app/generated/prisma";
+import { PrismaJson } from "@/prisma/types";
 
 export async function GET(req: Request) {
   try {
@@ -38,13 +39,35 @@ export async function POST(req: Request) {
       },
     });
 
-    const responseContent = await requestLLM(newQuestionRequest);
-    console.log(responseContent);
+    await generateQuestions(newQuestionRequest);
 
     return NextResponse.json(newQuestionRequest, { status: 201 });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ error: "Failed to create template" }, { status: 500 });
   }
+}
+
+async function generateQuestions(questionRequest: QuestionRequest) {
+  const jsonString = await requestLLM(questionRequest);
+  if (!jsonString) {
+    throw new Error("No response from LLM");
+  }
+  // console.log('RESULT', jsonString);
+  const json: PrismaJson.MultipleChoiceQuestionResponse = JSON.parse(jsonString);
+  const questions = json.questions;
+
+  await prisma.question.createMany({
+    data: questions.map((question) => ({
+      content: question.content,
+      correctAnswerIndex: question.correctAnswerIndex,
+      requestId: questionRequest.id,
+      alternatives: question.alternatives.map((alternative) => ({
+        content: alternative.content,
+        feedback: alternative.feedback,
+      })),
+    })),
+  });
 }
 
 async function generatePrompt(questionRequest: QuestionRequest) {
@@ -74,7 +97,7 @@ async function requestLLM(questionRequest: QuestionRequest) {
     baseURL: 'https://api.deepseek.com',
   });
 
-  console.log('trying llm');
+  console.log('sending request to LLM');
   const completion = await openai.chat.completions.create({
     messages: [{ role: 'system', content: prompt }],
     model: 'deepseek-chat',
