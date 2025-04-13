@@ -45,8 +45,8 @@ export default function QuestionRequestTemplates() {
   }
 
   function addParameter() {
-    if (!newParameter.name || !newParameter.values) return;
-    const valuesArray = newParameter.values.split(",").map((v) => v.trim());
+    if (!newParameter.name) return;
+    const valuesArray = newParameter.values.trim().length == 0 ? [] : newParameter.values.split(",").map((v) => v.trim());
     setNewTemplate({
       ...newTemplate,
       parameters: [

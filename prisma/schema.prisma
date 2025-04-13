@@ -20,17 +20,17 @@ datasource db {
 
 model User {
   id            Int    @id @default(autoincrement())
+  admin         Boolean @default(false)
   name          String?
   email         String    @unique
-  emailVerified DateTime?
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   groups Group[] @relation("GroupUsers")
   ownedGroups Group[]
-
   questionRequestTemplates QuestionRequestTemplate[]
+  questionRequests QuestionRequest[]
 }
 
 model Group {
@@ -63,5 +63,20 @@ model QuestionRequestTemplate {
   parameters     Json[]
   ownerId        Int
 
-  owner          User? @relation(fields: [ownerId], references: [id])
+  owner          User @relation(fields: [ownerId], references: [id])
+
+  requests       QuestionRequest[]
+}
+
+model QuestionRequest {
+  id              Int    @id @default(autoincrement())
+  /// [QuestionRequestParameterValue]
+  parameterValues Json[]
+  createdAt       DateTime @default(now())
+
+  templateId      Int
+  userId          Int
+
+  user           User @relation(fields: [userId], references: [id])
+  template       QuestionRequestTemplate? @relation(fields: [templateId], references: [id])
 }

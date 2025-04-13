@@ -4,4 +4,9 @@ export namespace PrismaJson {
     values: string[];
     multipleSelect: boolean;
   };
+
+  export type QuestionRequestParameterValue = {
+    name: string;
+    values: string[];
+  };
 }
