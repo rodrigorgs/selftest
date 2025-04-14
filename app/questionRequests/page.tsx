@@ -8,6 +8,7 @@ import { PrismaJson } from "@/prisma/types";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/spinner";
 
 export default function QuestionRequestPage() {
   const [templates, setTemplates] = useState<QuestionRequestTemplate[]>([]);
@@ -15,6 +16,7 @@ export default function QuestionRequestPage() {
   const [newRequest, setNewRequest] = useState({
     parameterValues: [] as PrismaJson.QuestionRequestParameterValue[],
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchTemplates() {
@@ -101,6 +103,7 @@ export default function QuestionRequestPage() {
       templateId: template.id,
       parameterValues: newRequest.parameterValues,
     };
+    setIsLoading(true);
     const response = await fetch("/api/questionRequests", {
       method: "POST",
       headers: {
@@ -108,8 +111,10 @@ export default function QuestionRequestPage() {
       },
       body: JSON.stringify(request),
     });
+    setIsLoading(false);
     if (response.ok) {
-      alert("Request created successfully!");
+      window.location.href = `/questions?templateId=${template.id}`;
+      // alert("Request created successfully!");
     } else {
       alert("Failed to create request");
     }
@@ -129,9 +134,15 @@ export default function QuestionRequestPage() {
         </>
         }
         {template &&
-          <Button onClick={createRequest}>
-            Generate Questions
-          </Button>
+          (
+            isLoading
+              ? <Spinner>
+                Generating questions...
+              </Spinner>
+              : <Button onClick={createRequest} disabled={isLoading}>
+                {isLoading ? <span className="spinner" /> : "Generate Questions"}
+              </Button>
+          )
         }
       </CardContent>
     </Card>

@@ -31,6 +31,7 @@ model User {
   ownedGroups Group[]
   questionRequestTemplates QuestionRequestTemplate[]
   questionRequests QuestionRequest[]
+  answers Answer[]
 }
 
 model Group {
@@ -91,4 +92,22 @@ model Question {
 
   requestId Int
   request   QuestionRequest @relation(fields: [requestId], references: [id])
+
+  answers Answer[]
+}
+
+model Answer {
+  id              Int    @id @default(autoincrement())
+  questionId      Int
+  userId          Int
+
+  answerIndex     Int
+  correct         Boolean
+  confidenceLevel Int
+  observation     String @default("")
+  createdAt       DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  @@index([userId, questionId], name: "user_question_unique")
 }
