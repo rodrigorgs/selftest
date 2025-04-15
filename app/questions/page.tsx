@@ -9,7 +9,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@radix-ui/react-label";
 import { Button } from "@/components/ui/button";
 import { unstable_batchedUpdates } from "react-dom";
+import { markedHighlight } from "marked-highlight";
+import hljs from "highlight.js";
+import { Marked } from "marked";
+import 'highlight.js/styles/github.css';
 
+const marked = new Marked(
+  markedHighlight({
+	emptyLangClass: 'hljs',
+    langPrefix: 'hljs language-',
+    highlight(code, lang, info) {
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
+    }
+  })
+);
 export default function QuestionsPage() {
   // const router = useRouter();
   const searchParams = useSearchParams();
@@ -122,7 +136,8 @@ function QuestionCard(props: { question: Question }) {
         )}
       </CardHeader>
       <CardContent>
-        <p className="text-gray-500">{question.content}</p>
+        <p className="text-gray-500"
+          dangerouslySetInnerHTML={{ __html: marked.parse(question.content) }}/>
         <br />
         {/* one item for each alternative */}
         <RadioGroup
@@ -134,16 +149,16 @@ function QuestionCard(props: { question: Question }) {
           {question.alternatives.map((alternative: any, alternativeIdx: number) => (
             <div className="flex flex-col space-y-1" key={alternativeIdx}>
               <div className="flex items-center space-x-2">
-              <RadioGroupItem id={`question-${question.id}-${alternativeIdx}`} value={'' + alternativeIdx} />
-              <Label htmlFor={`question-${question.id}-${alternativeIdx}`} className="ml-2">
-                {answer && (alternativeIdx === question.correctAnswerIndex
-                ? <span className={getAnswerClassName(alternativeIdx)}>✓ </span>
-                : <span className={getAnswerClassName(alternativeIdx)}>✗ </span>)}
-                {alternative.content}
-              </Label>
+                <RadioGroupItem id={`question-${question.id}-${alternativeIdx}`} value={'' + alternativeIdx} />
+                <Label htmlFor={`question-${question.id}-${alternativeIdx}`} className="ml-2">
+                  {answer && (alternativeIdx === question.correctAnswerIndex
+                    ? <span className={getAnswerClassName(alternativeIdx)}>✓ </span>
+                    : <span className={getAnswerClassName(alternativeIdx)}>✗ </span>)}
+                  <span dangerouslySetInnerHTML={{ __html: marked.parse(alternative.content) }} />
+                </Label>
               </div>
               {answer && (
-              <p className={getAnswerClassName(alternativeIdx)}>{question.alternatives[alternativeIdx].feedback}</p>
+                <p className={getAnswerClassName(alternativeIdx)}>{question.alternatives[alternativeIdx].feedback}</p>
               )}
             </div>
           ))}
@@ -151,7 +166,7 @@ function QuestionCard(props: { question: Question }) {
         {/* Confidence level */}
         {answer === null && (
           <div>
-            <br/>
+            <br />
             <p>Nível de confiança de que acertou a resposta (1 = pouco confiante, 5 = muito confiante)</p>
             <br />
             <RadioGroup

@@ -22,8 +22,10 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "highlight.js": "^11.11.1",
     "lucide-react": "^0.487.0",
     "marked": "^15.0.8",
+    "marked-highlight": "^2.2.1",
     "next": "15.3.0",
     "next-auth": "^4.24.11",
     "openai": "^4.93.0",
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/highlight.js": "^9.12.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
