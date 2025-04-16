@@ -62,7 +62,7 @@ export default function QuestionRequestTemplates() {
 
   function addParameter() {
     if (!newParameter.name) return;
-    const valuesArray = newParameter.values.trim().length == 0 ? [] : newParameter.values.split(",").map((v) => v.trim());
+    const valuesArray = newParameter.values.trim().length == 0 ? [] : newParameter.values.split(";").map((v) => v.trim());
     setNewTemplate({
       ...newTemplate,
       parameters: [
@@ -133,7 +133,7 @@ export default function QuestionRequestTemplates() {
                 type="text"
                 value={newParameter.values}
                 onChange={(e) => setNewParameter({ ...newParameter, values: e.target.value })}
-                placeholder="Comma-separated Values"
+                placeholder="Semicolon-separated Values (e.g. value1; value2)"
                 className="mb-2"
               />
               <Checkbox id="check"
