@@ -30,17 +30,15 @@ export default function QuestionsPage() {
   const [questions, setQuestions] = useState<any[]>([]);
 
   // Fetch questions from the server
-  async function fetchQuestions(templateId: string) {
-    const response = await fetch(`/api/questions?templateId=${templateId}`);
+  async function fetchQuestions(templateId?: string) {
+    const response = await fetch(`/api/questions${templateId !== undefined ? '?templateId=' + templateId : ''}`);
     const data = await response.json();
     setQuestions(data.questions);
   }
 
   useEffect(() => {
-    const templateId = searchParams?.get("templateId");
-    if (templateId) {
-      fetchQuestions(templateId);
-    }
+    const templateId = searchParams?.get("templateId") || undefined;
+    fetchQuestions(templateId);
   }, [useSearchParams]);
 
   // Use shadcn card

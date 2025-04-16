@@ -14,13 +14,7 @@ async function getParams(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const templateIdStr = searchParams.get("templateId");
-  if (!templateIdStr) {
-    throw NextResponse.json({ error: "templateId is required" }, { status: 400 });
-  }
-  const templateId = parseInt(templateIdStr, 10);
-  if (isNaN(templateId)) {
-    throw NextResponse.json({ error: "templateId must be a number" }, { status: 400 });
-  }
+  const templateId = templateIdStr === null || templateIdStr == '' ? undefined : parseInt(templateIdStr, 10);
 
   return { user, templateId };
 }
@@ -31,23 +25,23 @@ export async function GET(req: Request) {
 
     const questions = await prisma.question.findMany({
       include: {
-        answers: true,
+      answers: true,
       },
       where: {
-        answers: {
-          every: {
-            userId: user.id,
-          },
+      answers: {
+        every: {
+        userId: user.id,
         },
-        request: {
-          userId: user.id,
-          templateId: templateId,
-        }
+      },
+      request: {
+        userId: user.id,
+        ...(templateId !== undefined && { templateId: templateId }),
+      },
       },
       orderBy: {
-        request: {
-          createdAt: "desc",
-        },
+      request: {
+        createdAt: "desc",
+      },
       },
     });
     return NextResponse.json({ questions });
