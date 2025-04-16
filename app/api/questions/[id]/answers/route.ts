@@ -29,9 +29,9 @@ async function getParams(req: Request, params: { id: string }) {
   return { user, question };
 }
 
-export async function POST(req: Request, context: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, question } = await getParams(req, context.params)
+    const { user, question } = await getParams(req, await params)
     // if an answer already exists for this question and user, return error
     const existingAnswer = await prisma.answer.findFirst({
       where: {
@@ -65,9 +65,9 @@ export async function POST(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, question } = await getParams(req, context.params);
+    const { user, question } = await getParams(req, await params);
     // get answer
     const answer = await prisma.answer.findFirst({
       where: {
