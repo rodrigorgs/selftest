@@ -1,136 +1,107 @@
 'use client';
 
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { SessionProvider, useSession, signOut, signIn } from "next-auth/react";
-import Link from "next/link";
+import './globals.css'
+import { Inter } from 'next/font/google'
+import Link from 'next/link'
+import { Fragment, ReactNode, useState } from 'react'
+import { Menu, X } from 'lucide-react'
+import { SessionProvider, signIn, signOut, useSession } from 'next-auth/react';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ['latin'] })
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// export const metadata = {
+//   title: 'My App',
+//   description: 'Responsive menu example in Next.js 15',
+// }
+
+const routes = [
+  {
+    title: 'Templates',
+    href: '/templates',
+    requireAdmin: true,
+  },
+  {
+    title: 'Generate Questions',
+    href: '/questionRequests',
+  },
+  {
+    title: 'View Questions',
+    href: '/questions',
+  },
+]
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-
-  const routes = [
-    {
-      title: 'Create templates',
-      href: '/templates',
-      requireAdmin: true,
-    },
-    {
-      title: 'Generate Questions',
-      href: '/questionRequests',
-    },
-    {
-      title: 'View Questions',
-      href: '/questions',
-    },
-  ]
+}: {
+  children: ReactNode
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={inter.className}>
         <SessionProvider>
-          <Menu routes={routes}>
-            {children}
-          </Menu>
+          <Navbar />
+          <main className="p-4">{children}</main>
         </SessionProvider>
       </body>
     </html>
-  );
+  )
 }
 
-function Menu(props: { children?: React.ReactNode, routes: any[] }) {
-  const { children, routes } = props;
+function Navbar() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <nav className="bg-white shadow-md px-4 py-3 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <Link href="/" className="text-xl font-semibold text-gray-800">
+          SelfTest
+        </Link>
+        <button
+          className="md:hidden text-gray-800"
+          onClick={() => setOpen(!open)}
+          aria-label="Toggle Menu"
+        >
+          {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+        <ul className="hidden md:flex gap-6 text-gray-700 font-medium">
+          {/* <li><Link href="/">Home</Link></li>
+          <li><Link href="/about">About</Link></li>
+          <li><Link href="/contact">Contact</Link></li> */}
+          <MenuItems />
+        </ul>
+      </div>
+      {open && (
+        <ul className="md:hidden mt-2 space-y-2 text-gray-700 font-medium">
+          {/* <li><Link href="/" onClick={() => setOpen(false)}>Home</Link></li>
+          <li><Link href="/about" onClick={() => setOpen(false)}>About</Link></li>
+          <li><Link href="/contact" onClick={() => setOpen(false)}>Contact</Link></li> */}
+          <MenuItems onClick={() => setOpen(false)} />
+        </ul>
+      )}
+    </nav>
+  )
+}
+
+function MenuItems(props: { onClick?: () => void }) {
+  const { onClick } = props;
   const { data: session } = useSession();
   const isUserAdmin = () => {
     if (!session || !session.user) return false;
     return session.user.isAdmin === true;
   }
-  return <div style={{ display: "flex" }}>
-    <aside
-      style={{
-        width: "200px",
-        background: "#f4f4f4",
-        padding: "1rem",
-        boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
-      }}
-    >
-      <SessionMenuItems />
-      {routes
-        .filter((route => !route.requireAdmin || isUserAdmin()))
-        .map((route, index) =>
-        (
-          <Link key={index} href={route.href}>
-            <button
-              style={{
-                background: "#0070f3",
-                color: "white",
-                border: "none",
-                padding: "0.5rem 1rem",
-                borderRadius: "4px",
-                cursor: "pointer",
-                marginBottom: "1.0rem",
-              }}
-            >
-              {route.title}
-            </button>
-          </Link>))}
-    </aside>
-    <main style={{ flex: 1 }}>{children}</main>
-  </div>
-}
 
-function SessionMenuItems() {
-  const { data: session } = useSession();
+  return session ? (
+        <Fragment>
+          {routes
+            .filter((route => !route.requireAdmin || isUserAdmin()))
+            .map((route, index) =>
+            (
+              <Link key={index} href={route.href} onClick={onClick} className="block px-4 py-2 hover:bg-gray-100">
+                {route.title}
+              </Link>))}
+          <Link href='/api/auth/signout' className="block px-4 py-2 hover:bg-gray-100">{session.user?.email}</Link>
+        </Fragment>) : (
+        <Link href='/api/auth/signin' >Sign in</Link>
+      );
 
-  return (
-    <div>
-      {session ? (
-        <>
-          <p>Welcome, {session.user?.name}</p>
-          <button
-            onClick={() => signOut()}
-            style={{
-              background: "#0070f3",
-              color: "white",
-              border: "none",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginBottom: "1.0rem"
-            }}
-          >
-            Sign Out
-          </button>
-        </>
-      ) : (
-        <button
-          onClick={() => signIn()}
-          style={{
-            background: "#0070f3",
-            color: "white",
-            border: "none",
-            padding: "0.5rem 1rem",
-            borderRadius: "4px",
-            cursor: "pointer",
-            marginBottom: "1.0rem"
-          }}
-        >
-          Sign In
-        </button>
-      )}
-    </div>
-  );
 }
