@@ -2,4 +2,4 @@ WAIT=5
 TIMEOUT=30
 ATTEMPTS=6
 
-/api/health_check  200  OK
+/api/health_check  OK
