@@ -29,9 +29,9 @@ async function getParams(req: Request, params: { id: string }) {
   return { user, question };
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, context: { params: { id: string } }) {
   try {
-    const { user, question } = await getParams(req, params)
+    const { user, question } = await getParams(req, context.params)
     // if an answer already exists for this question and user, return error
     const existingAnswer = await prisma.answer.findFirst({
       where: {
