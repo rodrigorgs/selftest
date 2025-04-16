@@ -47,48 +47,18 @@ export default function RootLayout({
                 boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
               }}
             >
-              {/* {session ? ( */}
-              <button
-                onClick={() => signOut()}
-                style={{
-                  background: "#0070f3",
-                  color: "white",
-                  border: "none",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  marginBottom: "1rem",
-                }}
-              >
-                Logout
-              </button>
-              {/* ) : ( */}
-              <button
-                onClick={() => signIn()}
-                style={{
-                  background: "#0070f3",
-                  color: "white",
-                  border: "none",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  marginBottom: "1rem",
-                }}
-              >
-                Sign In
-              </button>
-              {/* )} */}
+              <SessionMenuItems/>
               {routes.map((route, index) =>
               (<Link key={index} href={route.href}>
                 <button
                   style={{
-                  background: "#0070f3",
-                  color: "white",
-                  border: "none",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  marginBottom: "1.0rem",
+                    background: "#0070f3",
+                    color: "white",
+                    border: "none",
+                    padding: "0.5rem 1rem",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    marginBottom: "1.0rem",
                   }}
                 >
                   {route.title}
@@ -100,5 +70,48 @@ export default function RootLayout({
         </SessionProvider>
       </body>
     </html>
+  );
+}
+
+function SessionMenuItems() {
+  const { data: session } = useSession();
+
+  return (
+    <div>
+      {session ? (
+        <>
+          <p>Welcome, {session.user?.name}</p>
+          <button
+            onClick={() => signOut()}
+            style={{
+              background: "#0070f3",
+              color: "white",
+              border: "none",
+              padding: "0.5rem 1rem",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginBottom: "1.0rem"
+            }}
+          >
+            Sign Out
+          </button>
+        </>
+      ) : (
+        <button
+          onClick={() => signIn()}
+          style={{
+            background: "#0070f3",
+            color: "white",
+            border: "none",
+            padding: "0.5rem 1rem",
+            borderRadius: "4px",
+            cursor: "pointer",
+            marginBottom: "1.0rem"
+          }}
+        >
+          Sign In
+        </button>
+      )}
+    </div>
   );
 }
