@@ -57,6 +57,15 @@ async function generateQuestions(questionRequest: QuestionRequest) {
   const json: PrismaJson.MultipleChoiceQuestionResponse = JSON.parse(jsonString);
   const questions = json.questions;
 
+  // for each question, shuffle the alternatives, updating the correctAnswerIndex
+  questions.forEach((question) => {
+    const indices = Array.from({ length: question.alternatives.length }, (_, i) => i);
+    indices.sort((i) => Math.random() - 0.5);
+    // shuffle alternatives and update the index of the correct answer
+    question.alternatives = indices.map((i) => question.alternatives[i]);
+    question.correctAnswerIndex = indices.indexOf(question.correctAnswerIndex);
+  });
+
   await prisma.question.createMany({
     data: questions.map((question) => ({
       content: question.content,
