@@ -2,6 +2,17 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import prisma from '@/lib/prisma';
 
+declare module "next-auth" {
+  interface Session {
+    user?: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      isAdmin?: boolean;
+    };
+  }
+}
+
 const authOptions = {
   providers: [
     GoogleProvider({
@@ -28,6 +39,13 @@ const authOptions = {
         return true;
       }
       return false;
+    },
+    async session({ session, token }: { session: any; token: any }) {
+      if (token.email) {
+        const user = await prisma.user.findUnique({ where: { email: token.email } });
+        session.user.isAdmin = user?.admin || false;
+      }
+      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

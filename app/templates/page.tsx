@@ -9,8 +9,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Label } from "@radix-ui/react-label";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function QuestionRequestTemplates() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/api/auth/signin");
+    } else if (status === "authenticated" && session?.user?.isAdmin === false) {
+      alert("You do not have permission to access this page.");
+      router.push("/");
+    }
+  }, [status, router]);
+
   const [templates, setTemplates] = useState<QuestionRequestTemplate[]>([]);
   const [newTemplate, setNewTemplate] = useState<any>({
     name: "",
@@ -22,6 +35,9 @@ export default function QuestionRequestTemplates() {
     values: "",
     multipleSelect: false,
   });
+
+
+
 
   async function fetchTemplates() {
     const response = await fetch("/api/templates");
@@ -125,7 +141,7 @@ export default function QuestionRequestTemplates() {
                 onCheckedChange={(checked) => setNewParameter({ ...newParameter, multipleSelect: !!checked })}
                 className="mb-2"
               />
-              <Label htmlFor="check"> Multiple selection</Label><br/>
+              <Label htmlFor="check"> Multiple selection</Label><br />
               <Button onClick={addParameter} className="mt-2">Add Parameter</Button>
             </CardContent>
           </Card>
