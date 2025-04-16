@@ -22,6 +22,16 @@ export default function RootLayout({
 }>) {
   // const { data: session } = useSession();
 
+  const routes = [
+    {
+      title: 'Generate Questions',
+      href: '/questionRequests',
+    },
+    {
+      title: 'View Questions',
+      href: '/questions',
+    },
+  ]
   return (
     <html lang="en">
       <body
@@ -38,34 +48,52 @@ export default function RootLayout({
               }}
             >
               {/* {session ? ( */}
-                <button
-                  onClick={() => signOut()}
-                  style={{
-                    background: "#0070f3",
-                    color: "white",
-                    border: "none",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Logout
-                </button>
+              <button
+                onClick={() => signOut()}
+                style={{
+                  background: "#0070f3",
+                  color: "white",
+                  border: "none",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  marginBottom: "1rem",
+                }}
+              >
+                Logout
+              </button>
               {/* ) : ( */}
+              <button
+                onClick={() => signIn()}
+                style={{
+                  background: "#0070f3",
+                  color: "white",
+                  border: "none",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  marginBottom: "1rem",
+                }}
+              >
+                Sign In
+              </button>
+              {/* )} */}
+              {routes.map((route, index) =>
+              (<Link key={index} href={route.href}>
                 <button
-                  onClick={() => signIn()}
                   style={{
-                    background: "#0070f3",
-                    color: "white",
-                    border: "none",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "4px",
-                    cursor: "pointer",
+                  background: "#0070f3",
+                  color: "white",
+                  border: "none",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  marginBottom: "1.0rem",
                   }}
                 >
-                  Sign In
+                  {route.title}
                 </button>
-              {/* )} */}
+              </Link>))}
             </aside>
             <main style={{ flex: 1 }}>{children}</main>
           </div>
