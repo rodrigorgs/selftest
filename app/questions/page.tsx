@@ -12,11 +12,12 @@ import { unstable_batchedUpdates } from "react-dom";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
 import { Marked } from "marked";
+import { Suspense } from "react";
 import 'highlight.js/styles/github.css';
 
 const marked = new Marked(
   markedHighlight({
-	emptyLangClass: 'hljs',
+    emptyLangClass: 'hljs',
     langPrefix: 'hljs language-',
     highlight(code, lang, info) {
       const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -24,8 +25,7 @@ const marked = new Marked(
     }
   })
 );
-export default function QuestionsPage() {
-  // const router = useRouter();
+function QuestionsPageInner() {
   const searchParams = useSearchParams();
   const [questions, setQuestions] = useState<any[]>([]);
 
@@ -39,28 +39,32 @@ export default function QuestionsPage() {
   useEffect(() => {
     const templateId = searchParams?.get("templateId") || undefined;
     fetchQuestions(templateId);
-  }, [useSearchParams]);
+  }, [searchParams]);
 
-  // Use shadcn card
+  return <Card className="w-full">
+    <CardHeader>
+      <h1 className="text-2xl font-bold">Questions</h1>
+    </CardHeader>
+    <CardContent>
+      {questions.length > 0 ? (
+        questions.map((question: any) => (
+          <div key={question.id} className="mb-4">
+            <QuestionCard question={question} />
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500">No questions available.</p>
+      )}
+    </CardContent>
+  </Card>
+}
+
+export default function QuestionsPage() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <h1 className="text-2xl font-bold">Questions</h1>
-      </CardHeader>
-      <CardContent>
-        {questions.length > 0 ? (
-          questions.map((question: any) => (
-            // console.log('QUESTION ', question),
-            <div key={question.id} className="mb-4">
-              <QuestionCard question={question} />
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500">No questions available.</p>
-        )}
-      </CardContent>
-    </Card>
-  )
+    <Suspense fallback={<div>Loading...</div>}>
+      <QuestionsPageInner />
+    </Suspense>
+  );
 }
 
 function QuestionCard(props: { question: Question }) {
@@ -135,7 +139,7 @@ function QuestionCard(props: { question: Question }) {
       </CardHeader>
       <CardContent>
         <p className="text-gray-500"
-          dangerouslySetInnerHTML={{ __html: marked.parse(question.content) }}/>
+          dangerouslySetInnerHTML={{ __html: marked.parse(question.content) }} />
         <br />
         {/* one item for each alternative */}
         <RadioGroup
