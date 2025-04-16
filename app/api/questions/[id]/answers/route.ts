@@ -7,10 +7,11 @@ async function getParams(req: Request, params: { id: string }) {
   if (!session || !session.user || !session.user.email) {
     throw NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!params.id) {
+  const id = (await params).id;
+  if (!id) {
     throw NextResponse.json({ error: "question id is required" }, { status: 400 });
   }
-  const questionId = parseInt(params.id, 10);
+  const questionId = parseInt(id, 10);
   if (isNaN(questionId)) {
     throw NextResponse.json({ error: "questionId must be a number" }, { status: 400 });
   }
