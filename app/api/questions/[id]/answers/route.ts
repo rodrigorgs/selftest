@@ -56,7 +56,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, question } = await getParams(req, await params);
+    const { user, question } = await getParams(req, params);
     // get answer
     const answer = await prisma.answer.findFirst({
       where: {
