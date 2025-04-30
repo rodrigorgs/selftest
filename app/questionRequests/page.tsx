@@ -8,6 +8,12 @@ import Link from "next/link";
 import Date from "@/components/date";
 
 export default function QuestionRequestsPage() {
+  return <Suspense>
+    <QuestionRequestsPageInner />
+  </Suspense>
+}
+
+function QuestionRequestsPageInner() {
   const [requests, setRequests] = useState<any>([]);
   const searchParams = useSearchParams();
   
@@ -21,8 +27,6 @@ export default function QuestionRequestsPage() {
 
     fetchData();
   }, []);
-
-  // return <div>Oi</div>;
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
