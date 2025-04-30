@@ -111,6 +111,18 @@ export default function QuestionRequestPage() {
 
   async function createRequest() {
     if (!template) return;
+
+    // Validate that all parameters have values
+    const missingParameters = template.parameters.filter((parameter) => {
+      const paramValue = newRequest.parameterValues.find((param) => param.name === parameter.name);
+      return !paramValue || paramValue.values.length === 0 || paramValue.values[0] === "";
+    });
+
+    if (missingParameters.length > 0) {
+      alert(`Please select a value for the following parameters: ${missingParameters.map((p) => p.name).join(", ")}`);
+      return;
+    }
+
     const request = {
       templateId: template.id,
       parameterValues: newRequest.parameterValues,
@@ -126,7 +138,6 @@ export default function QuestionRequestPage() {
     setIsLoading(false);
     if (response.ok) {
       window.location.href = `/questions?templateId=${template.id}`;
-      // alert("Request created successfully!");
     } else {
       alert("Failed to create request");
     }
