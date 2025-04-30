@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { fetchRequests } from "./server";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import Date from "@/components/date";
 
 export default function QuestionRequestsPage() {
   const [requests, setRequests] = useState<any>([]);
@@ -30,6 +31,7 @@ export default function QuestionRequestsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-left">Creation</TableHead>
               <TableHead className="text-left">Template</TableHead>
               <TableHead className="text-left">Parameters</TableHead>
               <TableHead className="text-left">Correct</TableHead>
@@ -39,6 +41,7 @@ export default function QuestionRequestsPage() {
           <TableBody>
             {requests.map((request: any) => (
               <TableRow key={request.id}>
+                <TableCell><Date date={request.createdAt} /></TableCell>
                 <TableCell>{request.template?.name}</TableCell>
                 <TableCell>{getParameterString(request.parameterValues)}</TableCell>
                 <TableCell>
