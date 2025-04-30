@@ -1,29 +1,18 @@
+import { getCurrentUser, getParamId } from "@/lib/apiUtils";
 import prisma from "@/lib/prisma";
+import { get } from "http";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-async function getParams(req: Request, params: { id: string }) {
-  const session = await getServerSession();
-  if (!session || !session.user || !session.user.email) {
-    throw NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const id = (await params).id;
-  if (!id) {
-    throw NextResponse.json({ error: "question id is required" }, { status: 400 });
-  }
-  const questionId = parseInt(id, 10);
-  if (isNaN(questionId)) {
-    throw NextResponse.json({ error: "questionId must be a number" }, { status: 400 });
-  }
+async function getParams(req: Request, params: Promise<{ id: string }>) {
+  const questionId = await getParamId({ params });
+  const user = await getCurrentUser(req);
+
   const question = await prisma.question.findUnique({
     where: { id: questionId },
   });
   if (!question) {
     throw NextResponse.json({ error: "Question not found" }, { status: 404 });
-  }
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-  if (!user) {
-    throw NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
   return { user, question };
@@ -31,7 +20,7 @@ async function getParams(req: Request, params: { id: string }) {
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, question } = await getParams(req, await params)
+    const { user, question } = await getParams(req, params)
     // if an answer already exists for this question and user, return error
     const existingAnswer = await prisma.answer.findFirst({
       where: {

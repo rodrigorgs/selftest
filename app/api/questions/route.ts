@@ -1,17 +1,11 @@
+import { getCurrentUser } from "@/lib/apiUtils";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 async function getParams(req: Request) {
-  const session = await getServerSession();
-  if (!session || !session.user || !session.user.email) {
-    throw NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-  if (!user) {
-    throw NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
-
+  const user = getCurrentUser(req);
+  
   const { searchParams } = new URL(req.url);
   const templateIdStr = searchParams.get("templateId");
   const templateId = templateIdStr === null || templateIdStr == '' ? undefined : parseInt(templateIdStr, 10);
