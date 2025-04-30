@@ -11,13 +11,16 @@ async function getParams(req: Request) {
   const userIdStr = searchParams.get("userId");
   const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
 
-  return { userId, templateId };
+  const questionRequestIdStr = searchParams.get("questionRequestId");
+  const questionRequestId = questionRequestIdStr === null || questionRequestIdStr == '' ? undefined : parseInt(questionRequestIdStr, 10);
+
+  return { userId, templateId, questionRequestId };
 }
 
 export async function GET(req: Request) {
   try {
     const currentUser = await getCurrentUser();
-    let { userId, templateId } = await getParams(req);
+    let { userId, templateId, questionRequestId } = await getParams(req);
     if (!userId) {
       userId = currentUser.id;
     }
@@ -38,6 +41,7 @@ export async function GET(req: Request) {
       },
       request: {
         userId: userId,
+        ...(questionRequestId !== undefined && { id: questionRequestId }),
         ...(templateId !== undefined && { templateId: templateId }),
       },
       },

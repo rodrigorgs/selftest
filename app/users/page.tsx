@@ -31,6 +31,7 @@ export default async function UsersPage() {
             <TableHead className="text-left">Name</TableHead>
             <TableHead className="text-left">Email</TableHead>
             <TableHead className="text-left">Is Admin</TableHead>
+            <TableHead className="text-left">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -44,6 +45,10 @@ export default async function UsersPage() {
               <TableCell>
                 <Link href={`/questions?userId=${user.id}`} className="text-blue-500 hover:underline">
                   View Questions
+                </Link>
+                &nbsp;|&nbsp;
+                <Link href={`/questionRequests?userId=${user.id}`} className="text-blue-500 hover:underline">
+                  View Requests
                 </Link>
               </TableCell>
             </TableRow>

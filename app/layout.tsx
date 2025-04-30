@@ -22,8 +22,13 @@ const routes = [
     requireAdmin: true,
   },
   {
+    title: 'Users',
+    href: '/users',
+    requireAdmin: true,
+  },
+  {
     title: 'Generate Questions',
-    href: '/questionRequests',
+    href: '/questionRequests/create',
   },
   {
     title: 'View Questions',

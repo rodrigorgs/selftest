@@ -1,174 +1,86 @@
 'use client';
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { QuestionRequestTemplate } from "../generated/prisma";
-import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
-import { PrismaJson } from "@/prisma/types";
-import { MultiSelect } from "@/components/ui/multi-select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/spinner";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getCurrentUser } from "@/lib/apiUtils";
+import prisma from "@/lib/prisma";
+import { useSearchParams } from "next/navigation";
+import { fetchRequests } from "./server";
+import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 
-
-export default function QuestionRequestPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+export default function QuestionRequestsPage() {
+  const searchParams = useSearchParams();
+  const userIdStr = searchParams?.get("userId") || null;
+  const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
+  const [requests, setRequests] = useState<any>([]);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/api/auth/signin");
+    async function fetchData() {
+      const result = await fetchRequests({ userId });
+      setRequests(result);
     }
-  }, [status, router]);
 
-  const [templates, setTemplates] = useState<QuestionRequestTemplate[]>([]);
-  const [template, setTemplate] = useState<QuestionRequestTemplate | null>(null);
-  const [newRequest, setNewRequest] = useState({
-    parameterValues: [] as PrismaJson.QuestionRequestParameterValue[],
-  });
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    async function fetchTemplates() {
-      const response = await fetch("/api/templates");
-      const data = await response.json();
-      setTemplates(data);
-    }
-    fetchTemplates();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    if (template) {
-      const initialValues = template.parameters.map((param) => ({
-        name: param.name,
-        values: param.multipleSelect ? [] : [""],
-      }));
-      setNewRequest({ parameterValues: initialValues });
-    }
-  }, [template]);
-
-  function renderParameterInput(parameter: PrismaJson.QuestionRequestTemplateParameter, key: string): any {
-    if (parameter.values && parameter.values.length > 0) {
-      if (parameter.multipleSelect) {
-        return <MultiSelect
-          key={key}
-          placeholder={`Select ${parameter.name}`}
-          options={parameter.values.map((value) => ({ value, label: value }))}
-          onValueChange={(values) => handleParameterChange(parameter, values)}
-        />
-      } else {
-        return <Select onValueChange={(value => handleParameterChange(parameter, [value]))} key={key}>
-          <SelectTrigger>
-            <SelectValue placeholder={`Select ${parameter.name}`} />
-          </SelectTrigger>
-          <SelectContent>
-            {parameter.values.map((value: string) => (
-              <SelectItem key={value} value={value}>
-                {value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      }
-    } else {
-      return <Input
-        key={key}
-        type="text"
-        value={newRequest.parameterValues.find((param) => param.name === parameter.name)?.values[0] || ""}
-        onChange={(e) => handleParameterChange(parameter, [e.target.value])}
-        placeholder={`Enter ${parameter.name}`}
-        className="mb-2"
-      />;
-    }
-  }
-
-  function handleParameterChange(parameter: PrismaJson.QuestionRequestTemplateParameter, values: string[]) {
-    const updatedValues = newRequest.parameterValues.map((param) => {
-      if (param.name === parameter.name) {
-        return { ...param, values: values };
-      }
-      return param;
-    });
-    setNewRequest({ ...newRequest, parameterValues: updatedValues });
-  }
-
-  function renderSelectTemplate() {
-    return <Select onValueChange={(value) => value ? setTemplate(templates.find((t) => `${t.id}` === value) || null) : setTemplate(null)}>
-      <SelectTrigger>
-        <SelectValue placeholder="Select a template" />
-      </SelectTrigger>
-      <SelectContent>
-        {templates.map((template: QuestionRequestTemplate) => (
-          <SelectItem key={template.id} value={`${template.id}`}>
-            {template.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>;
-  }
-
-  async function createRequest() {
-    if (!template) return;
-
-    // Validate that all parameters have values
-    const missingParameters = template.parameters.filter((parameter) => {
-      const paramValue = newRequest.parameterValues.find((param) => param.name === parameter.name);
-      return !paramValue || paramValue.values.length === 0 || paramValue.values[0] === "";
-    });
-
-    if (missingParameters.length > 0) {
-      alert(`Please select a value for the following parameters: ${missingParameters.map((p) => p.name).join(", ")}`);
-      return;
-    }
-
-    const request = {
-      templateId: template.id,
-      parameterValues: newRequest.parameterValues,
-    };
-    setIsLoading(true);
-    const response = await fetch("/api/questionRequests", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    });
-    setIsLoading(false);
-    if (response.ok) {
-      window.location.href = `/questions?templateId=${template.id}`;
-    } else {
-      alert("Failed to create request");
-    }
-  }
+  // return <div>Oi</div>;
 
   return (
-    <Card className="w-full max-w-2xl mx-auto mt-10 p-6">
-      <CardHeader className="text-center">
-        <h1 className="text-4xl font-bold">Generate Questions</h1>
-      </CardHeader>
-      <CardContent>
-        {renderSelectTemplate()}
-        {template && template.parameters?.length > 0 && <>
-          <h2 className="text-2xl font-semibold mt-4">Parameters</h2>
-          {template.parameters.map((parameter: PrismaJson.QuestionRequestTemplateParameter) =>
-            renderParameterInput(parameter, `param${parameter.name}`))}
-        </>
-        }
-        {template &&
-          (
-            isLoading
-              ? <Spinner>
-                Generating questions...
-              </Spinner>
-              : <Button onClick={createRequest} disabled={isLoading}>
-                {isLoading ? <span className="spinner" /> : "Generate Questions"}
-              </Button>
-          )
-        }
-      </CardContent>
-    </Card>
+    <Suspense fallback={<div>Loading...</div>}>
+      <div>
+        <h1>Users</h1>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-left">Template</TableHead>
+              <TableHead className="text-left">Parameters</TableHead>
+              <TableHead className="text-left">Correct</TableHead>
+              <TableHead className="text-left">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {requests.map((request: any) => (
+              <TableRow key={request.id}>
+                <TableCell>{request.template?.name}</TableCell>
+                <TableCell>{getParameterString(request.parameterValues)}</TableCell>
+                <TableCell>
+                  {getNumberOfCorrectAnswers(request.questions)}
+                </TableCell>
+                <TableCell>
+                  <Link href={`/questions?questionRequestId=${request.id}&userId=${request.userId}`} className="text-blue-500 hover:underline">
+                    View Questions
+                  </Link>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Suspense>
   );
+}
 
+function getParameterString(parameterValues: any) {
+  if (parameterValues.length === 0) {
+    return "No parameters";
+  }
+  return parameterValues.map((param: any) => {
+    if (param.values.length > 0) {
+      return `${param.name}: ${param.values.join(", ")}`;
+    } else {
+      return `${param.name}: No values`;
+    }
+  }).join(", ");
+}
+
+function getNumberOfCorrectAnswers(questions: any) {
+  if (questions.length === 0) {
+    return "No questions";
+  }
+  return questions.filter((question: any) => {
+    if (question.answers.length === 0) {
+      return false;
+    }
+    return question.correctAnswerIndex === question.answers[0].answerIndex;
+  }).length;
 }

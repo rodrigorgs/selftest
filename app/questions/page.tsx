@@ -34,18 +34,23 @@ function QuestionsPageInner() {
   const [questions, setQuestions] = useState<any[]>([]);
 
   // Fetch questions from the server
-  async function fetchQuestions(params: {templateId?: string, userId?: string}) {
-    const { templateId, userId } = params;
-    
-    const searchParams = new URLSearchParams();
-    
+  async function fetchQuestions(params: { templateId?: string, userId?: string, questionRequestId?: string }) {
+    const { templateId, userId, questionRequestId } = params;
+
+    const fetchSearchParams = new URLSearchParams();
+
     if (templateId) {
-      searchParams.set('templateId', templateId);
+      fetchSearchParams.set('templateId', templateId);
     }
     if (userId) {
-      searchParams.set('userId', userId);
+      fetchSearchParams.set('userId', userId);
     }
-    const response = await fetch(`/api/questions?${searchParams.toString()}`);
+    if (questionRequestId) {
+      fetchSearchParams.set('questionRequestId', questionRequestId);
+    }
+
+    const url = `/api/questions?${fetchSearchParams.toString()}`;
+    const response = await fetch(url);
     const data = await response.json();
     setQuestions(data.questions);
   }
@@ -53,8 +58,12 @@ function QuestionsPageInner() {
   useEffect(() => {
     const templateId = searchParams?.get("templateId") || undefined;
     const userId = searchParams?.get("userId") || undefined;
-    fetchQuestions({ templateId, userId });
+    const questionRequestId = searchParams?.get("questionRequestId") || undefined;
+    fetchQuestions({ templateId, userId, questionRequestId });
   }, [searchParams]);
+
+  const userIdStr = searchParams?.get('userId');
+  const userId = userIdStr == undefined ? undefined : parseInt(userIdStr, 10);
 
   return <Card className="w-full">
     <CardHeader>
@@ -64,7 +73,7 @@ function QuestionsPageInner() {
       {questions.length > 0 ? (
         questions.map((question: any) => (
           <div key={question.id} className="mb-4">
-            <QuestionCard question={question} />
+            <QuestionCard question={question} userId={userId} />
           </div>
         ))
       ) : (
@@ -82,15 +91,21 @@ export default function QuestionsPage() {
   );
 }
 
-function QuestionCard(props: { question: Question }) {
+function QuestionCard(props: { question: Question, userId?: number }) {
   const { question } = props;
   const [alternative, setAlternative] = useState<number | null>(null);
   const [confidenceLevel, setConfidenceLevel] = useState<number | null>(null);
   const [answer, setAnswer] = useState<Answer | null>(null);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams();
+    if (props.userId) {
+      searchParams.append("userId", props.userId.toString());
+    }
+    // searchParams.append("userId", userId ? userId.toString() : currentUser.id.toString());
+
     const fetchAnswer = async () => {
-      const response = await fetch(`/api/questions/${question.id}/answers`);
+      const response = await fetch(`/api/questions/${question.id}/answers?${searchParams.toString()}`);
       if (response.status === 404) {
         return;
       }
@@ -217,7 +232,7 @@ function QuestionCard(props: { question: Question }) {
   )
 }
 
-function QuestionFeedback(props: { question: Question, answer: Answer}) {
+function QuestionFeedback(props: { question: Question, answer: Answer }) {
   const { question, answer } = props;
   const [feedback, setFeedback] = useState<PrismaJson.QuestionFeedback>({
     flaggedIncorrect: answer.flaggedIncorrect,
@@ -250,39 +265,39 @@ function QuestionFeedback(props: { question: Question, answer: Answer}) {
     <div>
       <br />
       <details>
-      <summary className="cursor-pointer text-blue-500">Feedback</summary>
-      <div className="mt-2">
-        <Checkbox
-        id={`incorrect-${question.id}`}
-        checked={feedback.flaggedIncorrect}
-        onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedIncorrect: Boolean(checked) })) }} />
-        <Label htmlFor={`incorrect-${question.id}`} className="ml-2">A questão está incorreta</Label>
-        <br />
-        <Checkbox
-        id={`problems-${question.id}`}
-        checked={feedback.flaggedProblematic}
-        onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedProblematic: Boolean(checked) })) }} />
-        <Label htmlFor={`problems-${question.id}`} className="ml-2">A questão possui problemas</Label>
-        <br />
-        <Checkbox
-        id={`excellent-${question.id}`}
-        checked={feedback.flaggedExcellent}
-        onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedExcellent: Boolean(checked) })) }} />
-        <Label htmlFor={`excellent-${question.id}`} className="ml-2">A questão está excelente</Label>
-        <br />
-        <Input
-        type="text"
-        onChange={(e) => setFeedback(prev => ({ ...prev, observation: e.target.value }))}
-        value={feedback.observation}
-        placeholder="Observações"
-        className="mt-2" />
-        <Button
-        variant="default"
-        className="mt-2"
-        onClick={submitFeedback}>
-          Enviar feedback
-        </Button>
-      </div>
+        <summary className="cursor-pointer text-blue-500">Feedback</summary>
+        <div className="mt-2">
+          <Checkbox
+            id={`incorrect-${question.id}`}
+            checked={feedback.flaggedIncorrect}
+            onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedIncorrect: Boolean(checked) })) }} />
+          <Label htmlFor={`incorrect-${question.id}`} className="ml-2">A questão está incorreta</Label>
+          <br />
+          <Checkbox
+            id={`problems-${question.id}`}
+            checked={feedback.flaggedProblematic}
+            onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedProblematic: Boolean(checked) })) }} />
+          <Label htmlFor={`problems-${question.id}`} className="ml-2">A questão possui problemas</Label>
+          <br />
+          <Checkbox
+            id={`excellent-${question.id}`}
+            checked={feedback.flaggedExcellent}
+            onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedExcellent: Boolean(checked) })) }} />
+          <Label htmlFor={`excellent-${question.id}`} className="ml-2">A questão está excelente</Label>
+          <br />
+          <Input
+            type="text"
+            onChange={(e) => setFeedback(prev => ({ ...prev, observation: e.target.value }))}
+            value={feedback.observation}
+            placeholder="Observações"
+            className="mt-2" />
+          <Button
+            variant="default"
+            className="mt-2"
+            onClick={submitFeedback}>
+            Enviar feedback
+          </Button>
+        </div>
       </details>
     </div>
   )

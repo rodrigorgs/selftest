@@ -1,26 +1,29 @@
 import { getCurrentUser, getParamId } from "@/lib/apiUtils";
 import prisma from "@/lib/prisma";
-import { get } from "http";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 async function getParams(req: Request, params: Promise<{ id: string }>) {
   const questionId = await getParamId({ params });
-  const user = await getCurrentUser();
-
+  
   const question = await prisma.question.findUnique({
     where: { id: questionId },
   });
   if (!question) {
     throw NextResponse.json({ error: "Question not found" }, { status: 404 });
   }
+  
+  const searchParams = new URL(req.url).searchParams;
+  const userIdStr = searchParams.get("userId") || null;
+  const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
 
-  return { user, question };
+  return { question, userId };
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, question } = await getParams(req, params)
+    const user = await getCurrentUser();
+    const { question } = await getParams(req, params)
+
     // if an answer already exists for this question and user, return error
     const existingAnswer = await prisma.answer.findFirst({
       where: {
@@ -56,12 +59,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, question } = await getParams(req, params);
-    // get answer
+    const { question, userId } = await getParams(req, params);
+    const currentUser = await getCurrentUser();
+    
+    if (userId != undefined && userId != currentUser.id && !currentUser.admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     const answer = await prisma.answer.findFirst({
       where: {
         questionId: question.id,
-        userId: user.id,
+        userId: userId || currentUser.id,
       },
     });
     if (!answer) {
