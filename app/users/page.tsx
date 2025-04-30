@@ -11,8 +11,12 @@ export default async function UsersPage() {
     if (!currentUser.admin) {
       throw new Error("Unauthorized");
     }
-    
-    return prisma.user.findMany();
+
+    return prisma.user.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 
   const users = await fetchUsers();
