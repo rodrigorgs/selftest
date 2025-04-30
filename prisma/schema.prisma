@@ -104,8 +104,12 @@ model Answer {
   answerIndex     Int
   correct         Boolean
   confidenceLevel Int
-  observation     String @default("")
   createdAt       DateTime @default(now())
+
+  flaggedIncorrect Boolean @default(false)
+  flaggedProblematic Boolean @default(false)
+  flaggedExcellent Boolean @default(false)
+  observation     String @default("")
 
   question Question @relation(fields: [questionId], references: [id])
   user User @relation(fields: [userId], references: [id])

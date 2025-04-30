@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Fragment, ReactNode, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { SessionProvider, signIn, signOut, useSession } from 'next-auth/react';
+import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -48,7 +49,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <SessionProvider>
           <Navbar />
-          <main className="p-4">{children}</main>
+          <main className="p-4">
+            {children}
+          </main>
+          <Toaster />
         </SessionProvider>
       </body>
     </html>
@@ -99,17 +103,17 @@ function MenuItems(props: { onClick?: () => void }) {
   }
 
   return session ? (
-        <Fragment>
-          {routes
-            .filter((route => !route.requireAdmin || isUserAdmin()))
-            .map((route, index) =>
-            (
-              <Link key={index} href={route.href} onClick={onClick} className="block px-4 py-2 hover:bg-gray-100">
-                {route.title}
-              </Link>))}
-          <Link href='/api/auth/signout' className="block px-4 py-2 hover:bg-gray-100">{session.user?.email}</Link>
-        </Fragment>) : (
-        <Link href='/api/auth/signin' >Sign in</Link>
-      );
+    <Fragment>
+      {routes
+        .filter((route => !route.requireAdmin || isUserAdmin()))
+        .map((route, index) =>
+        (
+          <Link key={index} href={route.href} onClick={onClick} className="block px-4 py-2 hover:bg-gray-100">
+            {route.title}
+          </Link>))}
+      <Link href='/api/auth/signout' className="block px-4 py-2 hover:bg-gray-100">{session.user?.email}</Link>
+    </Fragment>) : (
+    <Link href='/api/auth/signin' >Sign in</Link>
+  );
 
 }

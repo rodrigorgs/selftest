@@ -14,6 +14,10 @@ import hljs from "highlight.js";
 import { Marked } from "marked";
 import { Suspense } from "react";
 import 'highlight.js/styles/github.css';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { PrismaJson } from "@/prisma/types";
+import { toast } from "sonner";
 
 const marked = new Marked(
   markedHighlight({
@@ -194,7 +198,80 @@ function QuestionCard(props: { question: Question }) {
               Submit
             </Button>
           </div>)}
+        {/* Feedback */}
+        {answer && <QuestionFeedback question={question} answer={answer} />}
       </CardContent>
     </Card>
+  )
+}
+
+function QuestionFeedback(props: { question: Question, answer: Answer}) {
+  const { question, answer } = props;
+  const [feedback, setFeedback] = useState<PrismaJson.QuestionFeedback>({
+    flaggedIncorrect: answer.flaggedIncorrect,
+    flaggedProblematic: answer.flaggedProblematic,
+    flaggedExcellent: answer.flaggedExcellent,
+    observation: answer.observation,
+  });
+
+  async function submitFeedback() {
+    try {
+      const response = await fetch(`/api/answers/${answer.id}/feedback`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(feedback),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit feedback");
+      }
+
+      const data = await response.json();
+      toast.success("Feedback submitted successfully");
+      console.log("Feedback submitted successfully", data);
+    } catch (error) {
+      toast.error("Error submitting feedback:" + error);
+    }
+  }
+
+  return (
+    <div>
+      <br />
+      <details>
+      <summary className="cursor-pointer text-blue-500">Feedback</summary>
+      <div className="mt-2">
+        <Checkbox
+        id={`incorrect-${question.id}`}
+        checked={feedback.flaggedIncorrect}
+        onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedIncorrect: Boolean(checked) })) }} />
+        <Label htmlFor={`incorrect-${question.id}`} className="ml-2">A questão está incorreta</Label>
+        <br />
+        <Checkbox
+        id={`problems-${question.id}`}
+        checked={feedback.flaggedProblematic}
+        onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedProblematic: Boolean(checked) })) }} />
+        <Label htmlFor={`problems-${question.id}`} className="ml-2">A questão possui problemas</Label>
+        <br />
+        <Checkbox
+        id={`excellent-${question.id}`}
+        checked={feedback.flaggedExcellent}
+        onCheckedChange={(checked) => { setFeedback(prev => ({ ...prev, flaggedExcellent: Boolean(checked) })) }} />
+        <Label htmlFor={`excellent-${question.id}`} className="ml-2">A questão está excelente</Label>
+        <br />
+        <Input
+        type="text"
+        onChange={(e) => setFeedback(prev => ({ ...prev, observation: e.target.value }))}
+        value={feedback.observation}
+        placeholder="Observações"
+        className="mt-2" />
+        <Button
+        variant="default"
+        className="mt-2"
+        onClick={submitFeedback}>
+          Enviar feedback
+        </Button>
+      </div>
+      </details>
+    </div>
   )
 }

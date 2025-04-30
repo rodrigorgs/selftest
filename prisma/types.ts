@@ -24,4 +24,12 @@ export namespace PrismaJson {
     content: string;
     feedback: string;
   };
+
+  export type QuestionFeedback = {
+    flaggedIncorrect: boolean;
+    flaggedProblematic: boolean;
+    flaggedExcellent: boolean;
+    observation: string;
+  }
+
 }
