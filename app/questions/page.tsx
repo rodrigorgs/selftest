@@ -160,7 +160,8 @@ function QuestionCard(props: { question: Question }) {
                   {answer && (alternativeIdx === question.correctAnswerIndex
                     ? <span className={getAnswerClassName(alternativeIdx)}>✓ </span>
                     : <span className={getAnswerClassName(alternativeIdx)}>✗ </span>)}
-                  <span dangerouslySetInnerHTML={{ __html: marked.parse(alternative.content) }} />
+                  <span className="font-bold">{String.fromCharCode(65 + alternativeIdx)}. </span>
+                  <span dangerouslySetInnerHTML={{ __html: marked.parseInline(alternative.content) }} />
                 </Label>
               </div>
               {answer && (
