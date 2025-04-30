@@ -1,20 +1,18 @@
 'use client';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getCurrentUser } from "@/lib/apiUtils";
-import prisma from "@/lib/prisma";
 import { useSearchParams } from "next/navigation";
 import { fetchRequests } from "./server";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function QuestionRequestsPage() {
-  const searchParams = useSearchParams();
-  const userIdStr = searchParams?.get("userId") || null;
-  const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
   const [requests, setRequests] = useState<any>([]);
-
+  
   useEffect(() => {
+    const searchParams = useSearchParams();
+    const userIdStr = searchParams?.get("userId") || null;
+    const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
     async function fetchData() {
       const result = await fetchRequests({ userId });
       setRequests(result);
