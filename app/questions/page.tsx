@@ -163,7 +163,7 @@ function QuestionCard(props: { question: Question, userId?: number }) {
         {answer && (
           <div>
             {/* <p className="text-gray-500">You have already answered this question.</p> */}
-            <p className={getAnswerClassName(answer.answerIndex)}>Your answer is {answer.correct ? 'correct' : 'incorrect'}!</p>
+            <p className={getAnswerClassName(answer.answerIndex)}>Your answer is {answer.correct ? 'correct' : 'incorrect'}! (Confidence level: {answer.confidenceLevel})</p>
           </div>
         )}
       </CardHeader>
