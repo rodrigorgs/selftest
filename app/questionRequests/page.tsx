@@ -8,9 +8,9 @@ import Link from "next/link";
 
 export default function QuestionRequestsPage() {
   const [requests, setRequests] = useState<any>([]);
+  const searchParams = useSearchParams();
   
   useEffect(() => {
-    const searchParams = useSearchParams();
     const userIdStr = searchParams?.get("userId") || null;
     const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
     async function fetchData() {
