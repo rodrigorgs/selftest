@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const id = await getParamId({ params });
-  const user = await getCurrentUser(req);
+  const user = await getCurrentUser();
   const json = await req.json();
 
   try {

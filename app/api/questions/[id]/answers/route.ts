@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 async function getParams(req: Request, params: Promise<{ id: string }>) {
   const questionId = await getParamId({ params });
-  const user = await getCurrentUser(req);
+  const user = await getCurrentUser();
 
   const question = await prisma.question.findUnique({
     where: { id: questionId },

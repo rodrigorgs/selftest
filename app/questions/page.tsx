@@ -34,15 +34,26 @@ function QuestionsPageInner() {
   const [questions, setQuestions] = useState<any[]>([]);
 
   // Fetch questions from the server
-  async function fetchQuestions(templateId?: string) {
-    const response = await fetch(`/api/questions${templateId !== undefined ? '?templateId=' + templateId : ''}`);
+  async function fetchQuestions(params: {templateId?: string, userId?: string}) {
+    const { templateId, userId } = params;
+    
+    const searchParams = new URLSearchParams();
+    
+    if (templateId) {
+      searchParams.set('templateId', templateId);
+    }
+    if (userId) {
+      searchParams.set('userId', userId);
+    }
+    const response = await fetch(`/api/questions?${searchParams.toString()}`);
     const data = await response.json();
     setQuestions(data.questions);
   }
 
   useEffect(() => {
     const templateId = searchParams?.get("templateId") || undefined;
-    fetchQuestions(templateId);
+    const userId = searchParams?.get("userId") || undefined;
+    fetchQuestions({ templateId, userId });
   }, [searchParams]);
 
   return <Card className="w-full">

@@ -4,18 +4,27 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 async function getParams(req: Request) {
-  const user = getCurrentUser(req);
-  
   const { searchParams } = new URL(req.url);
   const templateIdStr = searchParams.get("templateId");
   const templateId = templateIdStr === null || templateIdStr == '' ? undefined : parseInt(templateIdStr, 10);
+  
+  const userIdStr = searchParams.get("userId");
+  const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
 
-  return { user, templateId };
+  return { userId, templateId };
 }
 
 export async function GET(req: Request) {
   try {
-    const { user, templateId } = await getParams(req);
+    const currentUser = await getCurrentUser();
+    let { userId, templateId } = await getParams(req);
+    if (!userId) {
+      userId = currentUser.id;
+    }
+
+    if (userId != currentUser.id && !currentUser.admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     const questions = await prisma.question.findMany({
       include: {
@@ -24,11 +33,11 @@ export async function GET(req: Request) {
       where: {
       answers: {
         every: {
-        userId: user.id,
+        userId: userId,
         },
       },
       request: {
-        userId: user.id,
+        userId: userId,
         ...(templateId !== undefined && { templateId: templateId }),
       },
       },
