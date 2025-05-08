@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchExcellentAnswers, fetchFlaggedAnswers, fetchSurprisingAnswers } from "./server";
-import { QuestionCard } from "../questions/page";
+import { QuestionCard } from "@/components/questionCard";
 
 enum InterestingType {
   PROBLEMS = 'problems',
@@ -42,10 +42,25 @@ export default function InterestingAnswers() {
 
   return <div>
     <h1>Interesting Answers</h1>
-    <div>
-      <button onClick={() => setType(InterestingType.PROBLEMS)}>Problems</button>
-      <button onClick={() => setType(InterestingType.SURPRISING)}>Surprising</button>
-      <button onClick={() => setType(InterestingType.EXCELLENT)}>Excellent</button>
+    <div className="flex space-x-2">
+      <button
+      onClick={() => setType(InterestingType.PROBLEMS)}
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+      Problems
+      </button>
+      <button
+      onClick={() => setType(InterestingType.SURPRISING)}
+      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+      >
+      Surprising
+      </button>
+      <button
+      onClick={() => setType(InterestingType.EXCELLENT)}
+      className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+      >
+      Excellent
+      </button>
     </div>
 
     <h2>{type === InterestingType.PROBLEMS ? "Flagged Problems" : type === InterestingType.SURPRISING ? "Surprising Answers" : "Excellent Answers"}</h2>
