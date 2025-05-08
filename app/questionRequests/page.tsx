@@ -51,7 +51,16 @@ function QuestionRequestsPageInner() {
                 <TableCell>{request.template?.name}</TableCell>
                 <TableCell>{getParameterString(request.parameterValues)}</TableCell>
                 <TableCell>
-                  {getNumberOfCorrectAnswers(request.questions)}
+                  {
+                    (() => {
+                      const data = getNumberOfCorrectAnswers(request.questions);
+                      return <span>
+                        <span title="Correct" style={{cursor: 'pointer', color: 'green', fontWeight: 'bold'}}>{data.correct}</span>&nbsp;
+                        <span title="Answered" style={{cursor: 'pointer', color: 'blue'}}>{data.answered}</span>&nbsp;
+                        <span title="Total" style={{cursor: 'pointer'}}>{data.total}</span>
+                      </span>;
+                    })()
+                  }
                 </TableCell>
                 <TableCell>
                   <Link href={`/questions?questionRequestId=${request.id}&userId=${request.userId}`} className="text-blue-500 hover:underline">
@@ -81,13 +90,19 @@ function getParameterString(parameterValues: any) {
 }
 
 function getNumberOfCorrectAnswers(questions: any) {
-  if (questions.length === 0) {
-    return "No questions";
-  }
-  return questions.filter((question: any) => {
-    if (question.answers.length === 0) {
-      return false;
+  const total = questions.length;
+  let correct = 0;
+  let answered = 0;
+
+  for (const question of questions) {
+    const answerIndex = question.answers[0]?.answerIndex;
+    if (answerIndex !== undefined && answerIndex !== null) {
+      answered++;
+      if (answerIndex == question.correctAnswerIndex) {
+        correct++;
+      }
     }
-    return question.correctAnswerIndex === question.answers[0].answerIndex;
-  }).length;
+  }
+
+  return {total, correct, answered};
 }
