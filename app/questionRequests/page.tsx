@@ -31,7 +31,7 @@ function QuestionRequestsPageInner() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div>
-        <h1>Users</h1>
+        <h1>Question Requests</h1>
         <Table>
           <TableHeader>
             <TableRow>
