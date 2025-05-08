@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 
 export async function fetchRequests(params: { userId?: number }) {
   const currentUser = await getCurrentUser();
-  
+
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -17,14 +17,21 @@ export async function fetchRequests(params: { userId?: number }) {
   }
 
   return prisma.questionRequest.findMany({
-    where: {  
-      userId: params.userId,
+    where: {
+      ...(params.userId !== -1 && { userId: params.userId }),
     },
     orderBy: {
       createdAt: 'desc',
     },
+    take: params.userId === -1 ? 50 : undefined,
     include: {
       template: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      user: {
         select: {
           id: true,
           name: true,
@@ -35,9 +42,11 @@ export async function fetchRequests(params: { userId?: number }) {
           id: true,
           correctAnswerIndex: true,
           answers: {
-            where: {
-              userId: params.userId,
-            },
+            ...(params.userId !== -1 && {
+              where: {
+                userId: params.userId,
+              }
+            }),
             select: {
               id: true,
               answerIndex: true,

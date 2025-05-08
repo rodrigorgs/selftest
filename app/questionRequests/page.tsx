@@ -17,10 +17,10 @@ export default function QuestionRequestsPage() {
 function QuestionRequestsPageInner() {
   const [requests, setRequests] = useState<any>([]);
   const searchParams = useSearchParams();
-  
+  const userIdStr = searchParams?.get("userId") || null;
+  const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
+
   useEffect(() => {
-    const userIdStr = searchParams?.get("userId") || null;
-    const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
     async function fetchData() {
       const result = await fetchRequests({ userId });
       setRequests(result);
@@ -33,11 +33,28 @@ function QuestionRequestsPageInner() {
     <Suspense fallback={<div>Loading...</div>}>
       <div>
         <QuestionRequestCreatePage />
+
+        {userId !== -1 ? <>
+          <a href="/questionRequests?userId=-1" className="text-blue-500 hover:underline">
+            View recent requests from all users
+          </a>
+          <br />
+        </>
+          :
+          <>
+            <a href="/questionRequests" className="text-blue-500 hover:underline">
+              View your requests
+            </a>
+            <br />
+          </>
+        }
+
         <h1>Question Requests</h1>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="text-left">Creation</TableHead>
+              {userId === -1 && <TableHead className="text-left">User</TableHead>}
               <TableHead className="text-left">Template</TableHead>
               <TableHead className="text-left">Parameters</TableHead>
               <TableHead className="text-left">Correct</TableHead>
@@ -48,6 +65,14 @@ function QuestionRequestsPageInner() {
             {requests.map((request: any) => (
               <TableRow key={request.id}>
                 <TableCell><Date date={request.createdAt} /></TableCell>
+                {
+                  userId === -1 &&
+                  <TableCell>
+                    <Link href={`/questionRequests?userId=${request.userId}`} className="text-blue-500 hover:underline">
+                      {request.user.name}
+                    </Link>
+                  </TableCell>
+                }
                 <TableCell>{request.template?.name}</TableCell>
                 <TableCell>{getParameterString(request.parameterValues)}</TableCell>
                 <TableCell>
@@ -55,9 +80,9 @@ function QuestionRequestsPageInner() {
                     (() => {
                       const data = getNumberOfCorrectAnswers(request.questions);
                       return <span>
-                        <span title="Correct" style={{cursor: 'pointer', color: 'green', fontWeight: 'bold'}}>{data.correct}</span>&nbsp;
-                        <span title="Answered" style={{cursor: 'pointer', color: 'blue'}}>{data.answered}</span>&nbsp;
-                        <span title="Total" style={{cursor: 'pointer'}}>{data.total}</span>
+                        <span title="Correct" style={{ cursor: 'pointer', color: 'green', fontWeight: 'bold' }}>{data.correct}</span>&nbsp;
+                        <span title="Answered" style={{ cursor: 'pointer', color: 'blue' }}>{data.answered}</span>&nbsp;
+                        <span title="Total" style={{ cursor: 'pointer' }}>{data.total}</span>
                       </span>;
                     })()
                   }
@@ -104,5 +129,5 @@ function getNumberOfCorrectAnswers(questions: any) {
     }
   }
 
-  return {total, correct, answered};
+  return { total, correct, answered };
 }
