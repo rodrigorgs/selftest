@@ -6,6 +6,7 @@ import { fetchRequests } from "./server";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import Date from "@/components/date";
+import QuestionRequestCreatePage from "./create/page";
 
 export default function QuestionRequestsPage() {
   return <Suspense>
@@ -31,6 +32,7 @@ function QuestionRequestsPageInner() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div>
+        <QuestionRequestCreatePage />
         <h1>Question Requests</h1>
         <Table>
           <TableHeader>

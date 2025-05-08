@@ -27,12 +27,8 @@ const routes = [
     requireAdmin: true,
   },
   {
-    title: 'Generate Questions',
-    href: '/questionRequests/create',
-  },
-  {
-    title: 'View Questions',
-    href: '/questions',
+    title: 'Questions',
+    href: '/questionRequests',
   },
 ]
 

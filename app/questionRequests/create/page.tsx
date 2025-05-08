@@ -137,8 +137,10 @@ export default function QuestionRequestCreatePage() {
     });
     setIsLoading(false);
     if (response.ok) {
-      window.location.href = `/questions?templateId=${template.id}`;
+      const newQuestionRequest = await response.json();
+      window.location.href = `/questions?questionRequestId=${newQuestionRequest.id}`;
     } else {
+      console.log('Response', response);
       alert("Failed to create request");
     }
   }
