@@ -69,7 +69,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const answer = await prisma.answer.findFirst({
       where: {
         questionId: question.id,
-        userId: userId || currentUser.id,
+        userId: userId === -1 ? undefined : userId || currentUser.id,
       },
     });
     if (!answer) {

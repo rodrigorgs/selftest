@@ -34,8 +34,8 @@ function QuestionsPageInner() {
   const [questions, setQuestions] = useState<any[]>([]);
 
   // Fetch questions from the server
-  async function fetchQuestions(params: { templateId?: string, userId?: string, questionRequestId?: string }) {
-    const { templateId, userId, questionRequestId } = params;
+  async function fetchQuestions(params: { templateId?: string, userId?: string, questionRequestId?: string, interesting?: string }) {
+    const { templateId, userId, questionRequestId, interesting } = params;
 
     const fetchSearchParams = new URLSearchParams();
 
@@ -48,6 +48,11 @@ function QuestionsPageInner() {
     if (questionRequestId) {
       fetchSearchParams.set('questionRequestId', questionRequestId);
     }
+    if (interesting) {
+      fetchSearchParams.set('interesting', 'true');
+    }
+
+    console.log("Fetching questions with params:", fetchSearchParams.toString());
 
     const url = `/api/questions?${fetchSearchParams.toString()}`;
     const response = await fetch(url);
@@ -59,7 +64,8 @@ function QuestionsPageInner() {
     const templateId = searchParams?.get("templateId") || undefined;
     const userId = searchParams?.get("userId") || undefined;
     const questionRequestId = searchParams?.get("questionRequestId") || undefined;
-    fetchQuestions({ templateId, userId, questionRequestId });
+    const interesting = searchParams?.get("interesting") || undefined;
+    fetchQuestions({ templateId, userId, questionRequestId, interesting });
   }, [searchParams]);
 
   const userIdStr = searchParams?.get('userId');

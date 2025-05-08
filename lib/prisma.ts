@@ -7,7 +7,7 @@ const globalForPrisma = global as unknown as {
 
 const prisma = globalForPrisma.prisma || new PrismaClient(
     {
-        log: ['query', 'info', 'warn', 'error'],
+        // log: ['query', 'info', 'warn', 'error'],
         errorFormat: 'pretty',
     }
 ).$extends(withAccelerate())
