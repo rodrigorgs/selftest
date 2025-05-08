@@ -30,6 +30,10 @@ const routes = [
     title: 'Questions',
     href: '/questionRequests',
   },
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+  },
 ]
 
 export default function RootLayout({
