@@ -91,11 +91,11 @@ export default function QuestionsPage() {
   );
 }
 
-function QuestionCard(props: { question: Question, userId?: number }) {
+export function QuestionCard(props: { question: Question, userId?: number, withAnswer?: Answer }) {
   const { question } = props;
   const [alternative, setAlternative] = useState<number | null>(null);
   const [confidenceLevel, setConfidenceLevel] = useState<number | null>(null);
-  const [answer, setAnswer] = useState<Answer | null>(null);
+  const [answer, setAnswer] = useState<Answer | null>(props.withAnswer ?? null);
 
   useEffect(() => {
     const searchParams = new URLSearchParams();
