@@ -7,7 +7,7 @@ async function getParams(req: Request) {
   const { searchParams } = new URL(req.url);
   const templateIdStr = searchParams.get("templateId");
   const templateId = templateIdStr === null || templateIdStr == '' ? undefined : parseInt(templateIdStr, 10);
-  
+
   const userIdStr = searchParams.get("userId");
   const userId = userIdStr === null || userIdStr == '' ? undefined : parseInt(userIdStr, 10);
 
@@ -31,24 +31,24 @@ export async function GET(req: Request) {
 
     const questions = await prisma.question.findMany({
       include: {
-      answers: true,
+        answers: true,
       },
       where: {
-      answers: {
-        every: {
-        userId: userId,
+        answers: {
+          every: {
+            userId: userId,
+          },
+        },
+        request: {
+          userId: userId,
+          ...(questionRequestId !== undefined && { id: questionRequestId }),
+          ...(templateId !== undefined && { templateId: templateId }),
         },
       },
-      request: {
-        userId: userId,
-        ...(questionRequestId !== undefined && { id: questionRequestId }),
-        ...(templateId !== undefined && { templateId: templateId }),
-      },
-      },
       orderBy: {
-      request: {
-        createdAt: "desc",
-      },
+        request: {
+          createdAt: "desc",
+        },
       },
     });
     return NextResponse.json({ questions });
